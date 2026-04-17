@@ -81,14 +81,13 @@ function MyForm() {
         </div>
         <div className="mb-3 mt-3">
           <input
-            type="text"
+            type="email"
             className="form-control"
             id="correo"
             placeholder="Captura tu correo electrónico"
             name="correo"
             minLength="12"
             maxLength="60"
-            pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{3}"
             required
           />
           <div className="valid-feedback">Valido</div>
