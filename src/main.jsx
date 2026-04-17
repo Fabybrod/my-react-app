@@ -1,15 +1,59 @@
 import { createRoot } from 'react-dom/client'
 import { useState } from 'react'
+import { supabase } from './supabaseClient'
 
 function MyForm() {
+  const [loading, setLoading] = useState(false);
+  const [successMsg, setSuccessMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setErrorMsg('');
+    setSuccessMsg('');
+
+    const formData = new FormData(e.target);
+    const nombre_completo = formData.get('name');
+    const correo_electronico = formData.get('correo');
+    const movil = formData.get('movil');
+    const escuela_procedencia = formData.get('escuela_procedencia');
+    const carrera_interes = formData.get('carrera');
+    const acepta_terminos = formData.get('remember') === 'on';
+
+    const { error } = await supabase
+      .from('preregistros')
+      .insert([
+        {
+          nombre_completo,
+          correo_electronico,
+          movil,
+          escuela_procedencia,
+          carrera_interes,
+          acepta_terminos
+        }
+      ]);
+
+    if (error) {
+      console.error(error);
+      setErrorMsg('Hubo un error al guardar el registro. Intenta de nuevo.');
+    } else {
+      setSuccessMsg('¡Registro guardado con éxito!');
+      e.target.reset(); // Limpia el formulario
+    }
+    setLoading(false);
+  };
+
   return (
     <div className="container mt-3">
       <h3>Formulario de preregistro</h3>
       <p>Información de contacto</p>
 
+      {successMsg && <div className="alert alert-success">{successMsg}</div>}
+      {errorMsg && <div className="alert alert-danger">{errorMsg}</div>}
+
       <form
-        action="http://localhost/action_guardar_datos.php"
-        method="POST"
+        onSubmit={handleSubmit}
         className="was-validated"
       >
         <div className="mb-3 mt-3">
@@ -65,7 +109,7 @@ function MyForm() {
         </div>
 
       <div className="mb-3 mt-3">
-            <select className="form-select" name="escuela_procedencia" >
+            <select className="form-select" name="escuela_procedencia" required>
               <option value="">Selecciona tu escuela de procedencia:</option>
               <option value="CETIs">CETIs</option>
               <option value="CONALEP">CONALEP</option>
@@ -80,7 +124,7 @@ function MyForm() {
         </div>
 
       <div className="mb-3 mt-3">
-            <select className="form-select" name="carrera" >
+            <select className="form-select" name="carrera" required>
               <option value="">Selecciona la carrera que te interesa:</option>
               <option value="Tecnológias de la Información">Tecnológias de la Información</option>
               <option value="Mecatrónica">Mecatrónica</option>
@@ -107,12 +151,12 @@ function MyForm() {
             required
           />
           <label className="form-check-label" htmlFor="myCheck">
-            I agree on blabla.
+            Estoy de acuerdo en blabla.
           </label>
         </div>
 
-        <button type="submit" className="btn btn-primary">
-          Enviar
+        <button type="submit" className="btn btn-primary" disabled={loading}>
+          {loading ? 'Enviando...' : 'Enviar'}
         </button>
       </form>
     </div>
