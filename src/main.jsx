@@ -21,6 +21,12 @@ function MyForm() {
     const carrera_interes = formData.get('carrera');
     const acepta_terminos = formData.get('remember') === 'on';
 
+    if (!supabase) {
+      setErrorMsg('Error: Supabase no está configurado. ¿Agregaste las variables en Vercel?');
+      setLoading(false);
+      return;
+    }
+
     const { error } = await supabase
       .from('preregistros')
       .insert([
